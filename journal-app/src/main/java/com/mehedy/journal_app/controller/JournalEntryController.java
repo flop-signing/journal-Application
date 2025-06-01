@@ -1,7 +1,9 @@
 package com.mehedy.journal_app.controller;
 
 import com.mehedy.journal_app.entity.JournalEntry;
+import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.service.JournalEntryService;
+import com.mehedy.journal_app.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,23 +19,32 @@ public class JournalEntryController {
 
 
     private final JournalEntryService journalEntryService;
-    public JournalEntryController(JournalEntryService journalEntryService) {
+    private final UserService userService;
+
+    public JournalEntryController(JournalEntryService journalEntryService, UserService userService) {
         this.journalEntryService = journalEntryService;
+        this.userService=userService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<JournalEntry>> getAlljournals()
+    @GetMapping("/{username}")
+    public ResponseEntity<List<JournalEntry>> getAlljournalEntriesOfUser(@PathVariable String username)
     {
-        List<JournalEntry> journalEntries=journalEntryService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(journalEntries);
+        User existingUser = userService.findByUserName(username);
+        List<JournalEntry> journalEntries=existingUser.getJournalEntries();
+
+        if(journalEntries!=null && !journalEntries.isEmpty())
+        {
+            return ResponseEntity.status(HttpStatus.OK).body(journalEntries);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
     }
 
-    @PostMapping
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry entry)
+    @PostMapping("/{username}")
+    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry entry, @PathVariable String username)
     {
         try {
-            entry.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(Optional.of(entry));
+            journalEntryService.saveEntry(entry,username);
             return ResponseEntity.status(HttpStatus.CREATED).body(entry);
         }
         catch(Exception e)
@@ -50,27 +61,27 @@ public class JournalEntryController {
     }
 
 
-    @PutMapping("/id/{id}")
-    public ResponseEntity<JournalEntry> updateJournalEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry newEntry)
+    @PutMapping("/id/{username}/{id}")
+    public ResponseEntity<JournalEntry> updateJournalEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry newEntry, @PathVariable String username)
     {
-        Optional<JournalEntry> journalEntry= journalEntryService.findById(id);
+        JournalEntry journalEntry= journalEntryService.findById(id).orElse(null);
 
 
-        if(journalEntry.isPresent())
+        if(journalEntry!=null)
         {
-            journalEntry.get().setTitle(newEntry.getTitle()!=null && newEntry.getTitle().isEmpty() ?newEntry.getTitle():journalEntry.get().getTitle());
-            journalEntry.get().setContent(newEntry.getContent()!=null && newEntry.getContent().isEmpty() ?newEntry.getContent():journalEntry.get().getContent());
+            journalEntry.setTitle(newEntry.getTitle()!=null && newEntry.getTitle().isEmpty() ?newEntry.getTitle():journalEntry.getTitle());
+            journalEntry.setContent(newEntry.getContent()!=null && newEntry.getContent().isEmpty() ?newEntry.getContent():journalEntry.getContent());
             journalEntryService.saveEntry(journalEntry);
-            return ResponseEntity.status(HttpStatus.OK).body(journalEntry.get());
+            return ResponseEntity.status(HttpStatus.OK).body(journalEntry);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
     }
 
-    @DeleteMapping("/id/{id}")
-    public ResponseEntity<?> deleteJournalById(@PathVariable ObjectId id)
+    @DeleteMapping("/id/{username}/{id}")
+    public ResponseEntity<?> deleteJournalById(@PathVariable ObjectId id, @PathVariable String username)
     {
-        journalEntryService.deleteById(id);
+        journalEntryService.deleteById(id,username);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

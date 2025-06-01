@@ -1,10 +1,13 @@
 package com.mehedy.journal_app.service;
 
 import com.mehedy.journal_app.entity.JournalEntry;
+import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,13 +15,24 @@ import java.util.Optional;
 public class JournalEntryService {
 
     private final JournalEntryRepository journalEntryRepository;
+    private final UserService userService;
 
-    public JournalEntryService(JournalEntryRepository journalEntryRepository) {
+    public JournalEntryService(JournalEntryRepository journalEntryRepository,  UserService userService) {
         this.journalEntryRepository = journalEntryRepository;
+        this.userService=userService;
     }
 
-    public void saveEntry(Optional<JournalEntry> journalEntry) {
-        journalEntryRepository.save(journalEntry.orElseThrow());
+    public void saveEntry(JournalEntry journalEntry, String username) {
+        User user=userService.findByUserName(username);
+        journalEntry.setDate(LocalDateTime.now());
+        JournalEntry saved= journalEntryRepository.save(journalEntry);
+        user.getJournalEntries().add(saved);
+        userService.save(user);
+    }
+
+    public void saveEntry(JournalEntry journalEntry) {
+
+        journalEntryRepository.save(journalEntry);
     }
 
 
@@ -33,8 +47,12 @@ public class JournalEntryService {
     }
 
 
-    public void deleteById(ObjectId id)
+    public void deleteById(ObjectId id,String username)
     {
+        User user=userService.findByUserName(username);
+        // In no relational db there is no option of cascade, so we delete the data manually.
+        user.getJournalEntries().removeIf(journalEntry -> journalEntry.getId().equals(id));
+        userService.save(user);
         journalEntryRepository.deleteById(id);
     }
 
