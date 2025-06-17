@@ -1,5 +1,6 @@
 package com.mehedy.journal_app.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+@Builder
 @Document(collection = "users")
 public class User {
 
