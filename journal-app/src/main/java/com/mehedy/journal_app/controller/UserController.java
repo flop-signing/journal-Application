@@ -1,7 +1,9 @@
 package com.mehedy.journal_app.controller;
 
+import com.mehedy.journal_app.api.response.WeatherResponse;
 import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.service.UserService;
+import com.mehedy.journal_app.service.WeatherService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,9 +18,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final WeatherService weatherService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, WeatherService weatherService) {
         this.userService = userService;
+        this.weatherService = weatherService;
     }
 
     @GetMapping("/all-users")
@@ -53,6 +57,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         throw new UsernameNotFoundException("Username not found");
+    }
+
+
+    @GetMapping()
+    ResponseEntity<?> greeting(){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        String greeting="";
+        WeatherResponse weatherResponse=weatherService.getWeather("Dhaka");
+        if(weatherResponse!=null) {
+            greeting= "Weather feels like "+weatherService.getWeather("Dhaka").getCurrent().getTemperature()+"!";
+        }
+        return new ResponseEntity<>("Hi"+authentication.getName()+greeting,HttpStatus.OK);
     }
 
 

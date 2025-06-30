@@ -4,6 +4,8 @@ import com.mehedy.journal_app.entity.JournalEntry;
 import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +22,8 @@ public class JournalEntryService {
         this.journalEntryRepository = journalEntryRepository;
         this.userService = userService;
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(JournalEntryService.class);
 
     public void saveEntry(JournalEntry journalEntry, String username) {
         User user = userService.findByUserName(username);
