@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: Journal App
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/journalApp
+      # database: journaldb
+      auto-index-creation: true
+      # host: localhost
+      # port: 27017
+      # username:
+      # password:
+
+server:
+  port: 8080
+  servlet:
+    context-path: /journal
+
+weather:
+  api:
+    key: "0ad7111d743b9850b3f1c92f20e6a00f"
+
+#logging:
+#    level:
+#      net:
+#      mehedy:
+#         journal_app:DEBUG

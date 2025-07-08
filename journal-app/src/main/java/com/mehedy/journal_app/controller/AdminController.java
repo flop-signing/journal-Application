@@ -1,5 +1,6 @@
 package com.mehedy.journal_app.controller;
 
+import com.mehedy.journal_app.appcache.AppCache;
 import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,11 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+    private final AppCache appCache;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, AppCache appCache) {
         this.userService = userService;
+        this.appCache = appCache;
     }
 
     @GetMapping("/all-users")
@@ -32,6 +35,11 @@ public class AdminController {
     @PostMapping("/create-admin-user")
     public void createUser(@RequestBody User user) {
         userService.saveAdmin(user);
+    }
+
+    @GetMapping("/clear-app-cache")
+    public void clearAppCache(){
+        appCache.init();
     }
 
 }
