@@ -1,5 +1,6 @@
 package com.mehedy.journal_app.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mehedy.journal_app.api.response.WeatherResponse;
 import com.mehedy.journal_app.appcache.AppCache;
 import com.mehedy.journal_app.constants.Placeholders;
@@ -23,10 +24,23 @@ public class WeatherService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public WeatherResponse getWeather(String city) {
-        String finalApi = appCache.appCache.get(AppCache.keys.WEATHER_API.toString()).replace(Placeholders.CITY.getPlaceholder(),city).replace(Placeholders.API_KEY.getPlaceholder(),apiKey);
-       ResponseEntity<WeatherResponse> response= restTemplate.exchange(finalApi, HttpMethod.GET, null, WeatherResponse.class);
-        WeatherResponse body = response.getBody();
-        return body;
+    @Autowired
+    private RedisService redisService;
+
+    public WeatherResponse getWeather(String city) throws JsonProcessingException {
+        WeatherResponse weatherResponse = redisService.getValue("weather_of_" + city, WeatherResponse.class);
+        if (weatherResponse != null) {
+            return weatherResponse;
+        } else {
+            String finalApi = appCache.appCache.get(AppCache.keys.WEATHER_API.toString()).replace(Placeholders.CITY.getPlaceholder(), city).replace(Placeholders.API_KEY.getPlaceholder(), apiKey);
+            ResponseEntity<WeatherResponse> response = restTemplate.exchange(finalApi, HttpMethod.GET, null, WeatherResponse.class);
+            WeatherResponse body = response.getBody();
+            if(body!=null) {
+                redisService.setValue("weather_of_" + city,body,300l );
+            }
+            return body;
+        }
+
+
     }
 }

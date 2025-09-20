@@ -1,5 +1,6 @@
 package com.mehedy.journal_app.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mehedy.journal_app.api.response.WeatherResponse;
 import com.mehedy.journal_app.entity.User;
 import com.mehedy.journal_app.service.UserService;
@@ -61,7 +62,7 @@ public class UserController {
 
 
     @GetMapping()
-    ResponseEntity<?> greeting(){
+    ResponseEntity<?> greeting() throws JsonProcessingException {
         Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
         String greeting="";
         WeatherResponse weatherResponse=weatherService.getWeather("Dhaka");
