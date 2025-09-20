@@ -4,9 +4,11 @@ import com.mehedy.journal_app.entity.User;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class UserRepositoryImpl {
 
     private final MongoTemplate mongoTemplate;

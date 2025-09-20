@@ -2,6 +2,19 @@ spring:
   application:
     name: Journal App
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mehedy1804106@gmail.com
+    password: Java Mail
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   data:
     mongodb:
       uri: mongodb://localhost:27017/journalApp
